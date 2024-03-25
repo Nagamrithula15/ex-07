@@ -1,0 +1,261 @@
+-->(1)generating random quote
+-->servlet file
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Random;
+public class RandomQuoteServlet extends HttpServlet {
+private String[] quotes = {
+        "The only way to do great work is to love what you do. - Steve Jobs",
+        "Innovation distinguishes between a leader and a follower. - Steve Jobs",
+        "The best way to predict the future is to invent it. - Alan Kay",
+        "Stay hungry, stay foolish. - Steve Jobs",
+        "Quality is not an act, it is a habit. - Aristotle",
+        "Success is not final, failure is not fatal: It is the courage to continue that counts. - Winston Churchill"
+    };
+protected void doGet(HttpServletRequest request, HttpServletResponse response)
+throws ServletException, IOException {
+response.setContentType("text/html");
+        String randomQuote = getRandomQuote();
+        PrintWriter out = response.getWriter();
+        out.println("<html><head><title>Random Quote</title></head><body>");
+        out.println("<h1>Random Quote</h1>");
+        out.println("<p>" + randomQuote + "</p>");
+        out.println("</body></html>");
+    }
+    private String getRandomQuote() {
+        Random random = new Random();
+        int index = random.nextInt(quotes.length);
+        return quotes[index];
+    }
+}
+-->web.xml
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+
+    <servlet>
+        <servlet-name>RandomQuoteServlet</servlet-name>
+        <servlet-class>RandomQuoteServlet</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>RandomQuoteServlet</servlet-name>
+        <url-pattern>/randomquote</url-pattern>
+    </servlet-mapping>
+
+</web-app>
+-->html file
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Quote</title>
+</head>
+<body>
+    <h1>Random Quote Generator</h1>
+    <div id="quote-container">
+        <p id="quote">Loading...</p>
+        <button onclick="getRandomQuote()">Get Random Quote</button>
+    </div>
+    <script>
+        function getRandomQuote() {
+            fetch('/quote')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('quote').innerHTML = data;
+            })
+            .catch(error => console.error('Error:', error));
+        }
+        getRandomQuote(); // Display random quote on page load
+    </script>
+</body>
+</html>
+
+
+-->(2) salary calculation
+-->servlet file
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class GrossSalaryServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        String name = request.getParameter("name");
+        int empid = Integer.parseInt(request.getParameter("empid"));
+        double basicPay = Double.parseDouble(request.getParameter("basicPay"));
+        double hra = Double.parseDouble(request.getParameter("hra"));
+        double da = 0.5 * basicPay;
+        double grossPay = basicPay + hra + da;
+        out.println("<html><body>");
+        out.println("<h2>Employee Details</h2>");
+        out.println("<p>Name: " + name + "</p>");
+        out.println("<p>Employee ID: " + empid + "</p>");
+        out.println("<p>Basic Pay: $" + basicPay + "</p>");
+        out.println("<p>HRA: $" + hra + "</p>");
+        out.println("<p>DA: $" + da + "</p>");
+        out.println("<p>Gross Pay: $" + grossPay + "</p>");
+        out.println("</body></html>");
+        out.close();
+    }
+}
+-->web.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <servlet>
+        <servlet-name>GrossSalaryServlet</servlet-name>
+        <servlet-class>GrossSalaryServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>GrossSalaryServlet</servlet-name>
+        <url-pattern>/calculateGrossSalary</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
+-->html file
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Salary Calculator</title>
+</head>
+<body>
+    <h2>Enter Employee Details</h2>
+    <form action="calculateGrossSalary" method="post">
+        <label for="name">Name:</label><br>
+        <input type="text" id="name" name="name"><br>
+        <label for="empid">Employee ID:</label><br>
+        <input type="text" id="empid" name="empid"><br>
+        <label for="basicPay">Basic Pay:</label><br>
+        <input type="text" id="basicPay" name="basicPay"><br>
+        <label for="hra">HRA:</label><br>
+        <input type="text" id="hra" name="hra"><br><br>
+        <input type="submit" value="Calculate Gross Salary">
+    </form>
+</body>
+</html>
+
+
+-->(3) shopping cart using cookies
+-->Servlet program to store selected items in a cookie
+import java.io.IOException;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class AddToCartServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    throws ServletException, IOException {
+        String[] items = request.getParameterValues("item");
+        if (items != null && items.length > 0) {
+            StringBuilder cartItems = new StringBuilder();
+            for (String item : items) {
+                cartItems.append(item).append(",");
+            }
+            Cookie cookie = new Cookie("shoppingCart", cartItems.toString());
+            cookie.setMaxAge(3600); // Cookie expires in 1 hour
+            response.addCookie(cookie);
+        }
+        response.sendRedirect("ShoppingCartServlet");
+    }
+}
+-->Servlet program to display the shopping cart page
+import java.io.IOException;
+import java.io.PrintWriter;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+public class ShoppingCartServlet extends HttpServlet {
+    private static final long serialVersionUID = 1L;
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        response.setContentType("text/html");
+        PrintWriter out = response.getWriter();
+        out.println("<html><head><title>Shopping Cart</title></head><body>");
+        out.println("<h2>Your Shopping Cart:</h2>");
+        Cookie[] cookies = request.getCookies();
+        if (cookies != null) {
+            for (Cookie cookie : cookies) {
+                if (cookie.getName().equals("shoppingCart")) {
+                    String[] items = cookie.getValue().split(",");
+                    for (String item : items) {
+                        out.println("<p>" + item + "</p>");
+                    }
+                    break;
+                }
+            }
+        }
+        out.println("</body></html>");
+    }
+}
+-->web.xml 
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="http://xmlns.jcp.org/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_4_0.xsd"
+         version="4.0">
+    <servlet>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <servlet-class>AddToCartServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>AddToCartServlet</servlet-name>
+        <url-pattern>/AddToCartServlet</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <servlet-name>ShoppingCartServlet</servlet-name>
+        <servlet-class>ShoppingCartServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ShoppingCartServlet</servlet-name>
+        <url-pattern>/ShoppingCartServlet</url-pattern>
+    </servlet-mapping>
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+    </welcome-file-list>
+</web-app>
+-->html file
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Shopping Cart</title>
+</head>
+<body>
+    <h2>Select Items:</h2>
+    <form action="AddToCartServlet" method="post">
+        <input type="checkbox" name="item" value="Product 1"> Product 1<br>
+        <input type="checkbox" name="item" value="Product 2"> Product 2<br>
+        <input type="checkbox" name="item" value="Product 3"> Product 3<br>
+        <input type="checkbox" name="item" value="Product 4"> Product 4<br>
+        <input type="submit" value="Add to Cart">
+    </form>
+</body>
+</html>
+
+
+
+
